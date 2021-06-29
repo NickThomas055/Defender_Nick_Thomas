@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * parent class of all game objects
  */
-public abstract class GameObject implements Cloneable{
+public abstract class GameObject implements Cloneable {
     protected GameView gameView;
     protected double speedInPixel;
     protected Position position;
@@ -21,7 +21,8 @@ public abstract class GameObject implements Cloneable{
 
     /**
      * constructs a GameObject
-     * @param gameView
+     *
+     * @param gameView responsible for visuals
      */
     public GameObject(GameView gameView) {
         this.gameView = gameView;
@@ -35,7 +36,7 @@ public abstract class GameObject implements Cloneable{
         if (this instanceof MovingGameObject) {
             ((MovingGameObject) this).updatePosition();
         }
-        this.updateStatus();
+        updateStatus();
     }
 
     protected abstract void updateStatus();
@@ -58,7 +59,7 @@ public abstract class GameObject implements Cloneable{
     /**
      * responsible for passing GameObjects to the gamePlayManager
      *
-     * @param gamePlayManager
+     * @param gamePlayManager passes gameplaymanager
      * @link GamePlayManager
      */
     public void setGamePlayManager(GamePlayManager gamePlayManager) {
@@ -68,6 +69,7 @@ public abstract class GameObject implements Cloneable{
 
     /**
      * changes position by chosen amount
+     *
      * @param adaptX changes position.x
      * @param adaptY changes position.y
      */
@@ -75,9 +77,10 @@ public abstract class GameObject implements Cloneable{
         position.x += adaptX;
         position.y += adaptY;
     }
+
     @Override
-    public String toString(){
-        return this.getClass().getSimpleName()+position.toString();
+    public String toString() {
+        return this.getClass().getSimpleName() + position.toString();
     }
 
     @Override
@@ -89,7 +92,7 @@ public abstract class GameObject implements Cloneable{
             return false;
         }
         GameObject other = (GameObject) o;
-        return  this.position == other.position && this.size == other.size;
+        return this.position == other.position && this.size == other.size;
     }
 
     /**
@@ -99,12 +102,13 @@ public abstract class GameObject implements Cloneable{
      */
     @Override
     public int hashCode() {
-        return Objects.hash(position.x, position.y,size);
+        return Objects.hash(position.x, position.y, size);
 
     }
+
     @Override
     public GameObject clone() {
-       GameObject other = null;
+        GameObject other = null;
         try {
             other = (GameObject) super.clone();
         } catch (CloneNotSupportedException ignored) {

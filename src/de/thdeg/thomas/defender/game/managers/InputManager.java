@@ -57,6 +57,7 @@ public class InputManager {
 
             } else if (keyCode == KeyEvent.VK_SPACE) {
                 chopper.shoot();
+
                 if (NODIAGONAL) {
                     break;
                 }

@@ -6,15 +6,13 @@ import de.thdeg.thomas.defender.gameview.GameView;
 /**
  * parent class for all kinds of vehicles
  */
-abstract public class Vehicles extends CollidableGameObject{
+abstract public class Vehicles extends CollidableGameObject {
     int amountOfAmmo;
     int health;
-    String color;
-    boolean landingIsClear;
     boolean flyFromLeftToRight;
 
 
-    Vehicles(GameView gameView){
+    Vehicles(GameView gameView) {
         super(gameView);
     }
 
@@ -29,9 +27,9 @@ abstract public class Vehicles extends CollidableGameObject{
      * responsible for aligning a hitbox with an object
      */
     @Override
-    public void updateHitBoxPosition(){
-        this.hitBox.x = (int)this.position.x;
-        this.hitBox.y = (int)this.position.y+10;
+    public void updateHitBoxPosition() {
+        this.hitBox.x = (int) this.position.x;
+        this.hitBox.y = (int) this.position.y + 10;
 
     }
 
@@ -48,12 +46,6 @@ abstract public class Vehicles extends CollidableGameObject{
         return (this.speedInPixel);
     }
 
-    /**
-     * @return returns True if the Landing of the object is possible
-     */
-    public boolean isLandingIsClear() {
-        return landingIsClear;
-    }
 
     /**
      * @param Size sets size of object
@@ -63,7 +55,7 @@ abstract public class Vehicles extends CollidableGameObject{
     }
 
     /**
-     * @param height
+     * @param height height of object
      */
     public void setHeight(int height) {
         this.height = height;

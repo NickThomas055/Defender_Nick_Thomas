@@ -2,134 +2,191 @@ package de.thdeg.thomas.defender.game.managers;
 
 import de.thdeg.thomas.defender.game.Position;
 import de.thdeg.thomas.defender.gameview.GameView;
-import de.thdeg.thomas.defender.graphics.entities.Alien;
-import de.thdeg.thomas.defender.graphics.entities.CollidableGameObject;
-import de.thdeg.thomas.defender.graphics.entities.Ship;
-import de.thdeg.thomas.defender.graphics.entities.Shot;
+import de.thdeg.thomas.defender.graphics.entities.*;
+import de.thdeg.thomas.defender.graphics.level.*;
 
 import java.util.ArrayList;
 
 /**
- * class responsible for level and game procedure
+ * class responsible for Level and game procedure
  */
 public class GamePlayManager {
+
     private final GameView gameView;
+    public boolean gameOver;
+    ArrayList<CollidableGameObject> collidableGameObjects;
     private final GameObjectManager gameObjectManager;
-    private boolean listHasBeenDeleted;
-    private boolean listHasBeenDeletedShips;
+    private LevelManager levelManager;
+    private Level level;
+    /**
+     * creates new player for game progress
+     */
+    public Player player;
+    public Map map;
+    private Overlay overlay;
+    private StartScreen startScreen;
+    private EndScreen endScreen;
+    private int wave;
+    private boolean timerHasBeenSet;
 
 
     /**
-     * responsible for level and game procedure
+     * responsible for Level and game procedure
      *
-     * @param gameView
-     * @param gameObjectManager
+     * @param gameView          responsible for visuals
+     * @param gameObjectManager responsible for gameObject management
      */
     public GamePlayManager(GameView gameView, GameObjectManager gameObjectManager) {
         this.gameView = gameView;
+        collidableGameObjects = new ArrayList<>();
         this.gameObjectManager = gameObjectManager;
+        this.overlay = gameObjectManager.getOverlay();
         gameObjectManager.getPlayer().setGamePlayManager(this);
-        listHasBeenDeleted = false;
-        listHasBeenDeletedShips = false;
+        initializeLevel();
 
+
+    }
+
+    private void initializeLevel() {
+        //this.levelManager = new LevelManager(true);
+        this.startScreen = new StartScreen(gameView);
+        this.endScreen = new EndScreen(gameView);
+        startScreen.startScreen();
+        level = new Level();
+        player = new Player();
+        level.setWave(1);
+        gameObjectManager.getPlayer().resetPosition();
+        clearObjects();
+
+    }
+
+    private void clearObjects() {
+        gameObjectManager.getFarmers().clear();
+        gameObjectManager.getAliens().clear();
+        gameObjectManager.getShips().clear();
+        gameObjectManager.getPlasmaBalls().clear();
     }
 
     /**
      * updates map and entities
      */
     public void updateGamePlay() {
-        spawnAndDestroyAliens();
-        spawnAndDestroyShips();
+        spawnAndDestroyEntities();
+        if (gameOver) {
+            endScreen.showEndScreen("      You lost!\n      The aliens have won!" + "\n      you reached wave:" + wave + "\n      your score is:" + player.score);
+            gameOver = false;
+            initializeLevel();
+        }
     }
 
     /**
-     * desotroys selected Alien object
+     * destroys selected Alien object
      *
      * @param collidableGameObject : Alien object you want to destroy
      */
     public void destroyAliens(CollidableGameObject collidableGameObject) {
-
+        player.increaseScoreBy(100);
         gameObjectManager.getAliens().remove(collidableGameObject);
-
-
     }
 
     /**
-     * desotroys selected ship object
+     * destroys selected ship object
      *
      * @param collidableGameObject : ship object you want to destroy
      */
     public void destroyShips(CollidableGameObject collidableGameObject) {
+        player.increaseScoreBy(300);
         gameObjectManager.getShips().remove(collidableGameObject);
 
     }
 
-    void spawnAndDestroyAliens() {
+    /**
+     * when a projectile hits the player, this method is used to subtract his health
+     *
+     * @param damageDone amount of damage that the player should receive
+     */
+    public void hitPlayer(int damageDone) {
+        player.damagePlayerHealth(damageDone);
 
-        if (!listHasBeenDeleted && (gameView.getGameTimeInMilliseconds() >= 10000)) {
-            gameObjectManager.getAliens().clear();
-            listHasBeenDeleted = true;
-        }
-        if (gameView.timerExpired("alientimer", "GamePlayManager")) {
-            gameView.setTimer("alientimer", "GamePlayManager", 10000);
-            Alien alien = new Alien(gameView);
+    }
+
+    /**
+     * @return integer of current wave
+     */
+    public int getWaveLevel() {
+        return level.getWave();
+    }
+
+    private void spawnAndDestroyEntities() {
+        this.wave = level.getWave();
+        collidableGameObjects.add(gameObjectManager.getPlayer());
+        if (wave == 1) {
+
+            Farmer farmer = new Farmer(gameView, collidableGameObjects);
+            Alien alien = new Alien(gameView, farmer);
+            alien.setGamePlayManager(this);
+            gameObjectManager.getFarmers().add(farmer);
             gameObjectManager.getAliens().add(alien);
-            System.out.print("created");
-        }
-        if (gameObjectManager.getAliens().size() >= 3) {
-            System.out.print("removed");
-            gameObjectManager.getAliens().removeFirst();
-        }
-        if (gameObjectManager.getAliens().size() >= 1) {
-            if (gameView.timerExpired("destruction", "destruction")) {
-                gameObjectManager.getAliens().remove((Math.random() * (gameObjectManager.getAliens().size() - 0)) + 0);
+            collidableGameObjects.addAll(gameObjectManager.getAliens());
+            level.nextWave();
+        } else {
+            if (gameObjectManager.getAliens().size() <= 0 && gameObjectManager.getShips().size() <= 0) {
+                gameObjectManager.getFarmers().clear();
+                overlay.ShowMessage("Good Job! Wave:" + Integer.toString(level.getWave()));
+                if (!timerHasBeenSet) {
+                    gameView.setTimer("wavetimer", "wavetimer", 3000);
+                    timerHasBeenSet = true;
+                }
+                if (gameView.timerExpired("wavetimer", "wavetimer")) {
+                    level.nextWave();
+                    gameObjectManager.getPlayer().resetPosition();
+                    gameObjectManager.updateHUD(wave);
+                    spawnWave();
+                    timerHasBeenSet = false;
+                }
             }
-            gameView.setTimer("destruction", "destruction", 5000);
 
         }
+
     }
 
-    void spawnAndDestroyShips() {
+    private void spawnWave() {
 
-        if (!listHasBeenDeletedShips && (gameView.getGameTimeInMilliseconds() >= 10000)) {
-            gameObjectManager.getShips().clear();
-            listHasBeenDeletedShips = true;
+        for (int z = 0; z < wave; z++) {
+            Farmer farmer = new Farmer(gameView, collidableGameObjects);
+            Alien alien = new Alien(gameView, farmer);
+            alien.setGamePlayManager(this);
+            gameObjectManager.getFarmers().add(farmer);
+            gameObjectManager.getAliens().add(alien);
+            collidableGameObjects.addAll(gameObjectManager.getAliens());
+
         }
-
-        if (gameView.timerExpired("shiptimer", "GamePlayManager")) {
-            gameView.setTimer("shiptimer", "GamePlayManager", 10000);
-
+        for (int z = 0; z < wave / 2; z++) {
             Ship ship = new Ship(gameView);
+            ship.setGamePlayManager(this);
             gameObjectManager.getShips().add(ship);
-            System.out.print("created");
-        }
-        if (gameObjectManager.getShips().size() >= 3) {
-            System.out.print("removed");
-            gameObjectManager.getShips().removeFirst();
-        }
-        if (gameObjectManager.getShips().size() >= 1) {
-            if (gameView.timerExpired("destructionShip", "destruction")) {
-                gameObjectManager.getShips().remove((Math.random() * (gameObjectManager.getShips().size() - 0)) + 0);
-            }
-            gameView.setTimer("destructionShip", "destruction", 5000);
 
         }
 
     }
+
 
     /**
      * lets chopper shoot 1 rocket at a time
      *
      * @param startPosition sets position where rocket is spawned
      */
-    public void shootRocketChopper(Position startPosition) {
+    public void shootRocketChopper(Position startPosition, Chopper.Direction direction) {
         ArrayList<CollidableGameObject> collidableGameObjects = new ArrayList<>();
         collidableGameObjects.addAll(gameObjectManager.getShips());
         collidableGameObjects.addAll(gameObjectManager.getAliens());
-        Shot shot = new Shot(gameView, collidableGameObjects);
-        shot.setPosition(new Position(startPosition.x, startPosition.y + 23));
-        System.out.println("shoot!");
-
+        Shot shot = new Shot(gameView, collidableGameObjects, direction);
+        if (direction == Chopper.Direction.RIGHT) {
+            shot.setPosition(new Position(startPosition.x + 30, startPosition.y + 5));
+        }
+        if (direction == Chopper.Direction.LEFT) {
+            shot.setPosition(new Position(startPosition.x + 12, startPosition.y + 2));
+        }
         gameObjectManager.getShots().add(shot);
         shot.updatePosition();
         shot.setGamePlayManager(this);
@@ -138,27 +195,52 @@ public class GamePlayManager {
     }
 
     /**
-     * despawns shot objects that are no longer needed
+     * spawns a hostile projectile
      *
-     * @param shot describes shot that should be deleted
+     * @param startPosition starting position of projectile
      */
-    public void destroy(Shot shot) {
-        System.out.println("deleted");
-        gameObjectManager.getShots().remove(shot);
+    public void shootPlasmaBall(Position startPosition) {
+        ArrayList<CollidableGameObject> collidablePlayer = new ArrayList<>();
+        collidablePlayer.add(gameObjectManager.getPlayer());
+        PlasmaBall plasmaBall = new PlasmaBall(gameView, collidablePlayer);
+        plasmaBall.setPosition(new Position(startPosition.x, startPosition.y + 23));
+
+
+        gameObjectManager.getPlasmaBalls().add(plasmaBall);
+        plasmaBall.updatePosition();
+        plasmaBall.setGamePlayManager(this);
+
+
+    }
+
+    /**
+     * deSpawns shot objects that are no longer needed
+     */
+    public void destroy(Projectile projectile) {
+
+        if (projectile.getClass() == Shot.class) {
+            gameObjectManager.getShots().remove(projectile);
+        }
+        if (projectile.getClass() == PlasmaBall.class) {
+            gameObjectManager.getPlasmaBalls().remove(projectile);
+        }
     }
 
     /**
      * responsible for moving the background for the illusion of space
-     * @param speedInPixel
      */
-    public void chopperMovingLeft(double speedInPixel) {
-        gameObjectManager.moveWorld(+2, 0);
+    public void chopperMovingLeft() {
+        if (gameObjectManager.getCloudPosition().x <= 0) {
+            gameObjectManager.moveWorld(+2, 0);
+        }
     }
 
     /**
      * {@link #chopperMovingLeft}
      */
-    public void chopperMovingRight(double speedInPixel) {
-        gameObjectManager.moveWorld(-2, 0);
+    public void chopperMovingRight() {
+        if (gameObjectManager.getCloudPosition().x >= -1255) {
+            gameObjectManager.moveWorld(-2, 0);
+        }
     }
 }

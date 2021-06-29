@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Enables the use of {@link #x} and {@link #y} coordinates to display positions in a grid
  */
-public class Position implements Cloneable {
+public class Position implements Cloneable, Comparable<Position> {
     /**
      * x coordinate on grid
      */
@@ -27,6 +27,18 @@ public class Position implements Cloneable {
     }
 
     /**
+     * compares distance of p to (0,0)
+     *
+     * @param p position you want to compare
+     * @return a value of 1,-1 or 0
+     */
+    @Override
+    public int compareTo(Position p) {
+        Position pos = new Position(0, 0);
+        return (int) Math.signum(p.distance(pos));
+    }
+
+    /**
      * standard constructor for Position
      * sets x and y coordinates to (0,0)
      */
@@ -39,7 +51,7 @@ public class Position implements Cloneable {
      */
     public void left() {
         x -= 1;
-        return;
+
     }
 
     /**
@@ -61,7 +73,7 @@ public class Position implements Cloneable {
      */
     public void right(double pixel) {
         x += pixel;
-        return;
+
     }
 
     /**
@@ -69,7 +81,7 @@ public class Position implements Cloneable {
      */
     public void up() {
         y -= 1;
-        return;
+
     }
 
     /**
@@ -77,7 +89,7 @@ public class Position implements Cloneable {
      */
     public void up(double pixel) {
         y -= pixel;
-        return;
+
     }
 
     /**
@@ -85,7 +97,7 @@ public class Position implements Cloneable {
      */
     public void down() {
         y += 1;
-        return;
+
     }
 
     /**
@@ -93,7 +105,7 @@ public class Position implements Cloneable {
      */
     public void down(double pixel) {
         y += pixel;
-        return;
+
     }
 
     /**
@@ -110,7 +122,7 @@ public class Position implements Cloneable {
      * returns if two objects are equal
      *
      * @param o object you want to compare
-     * @return
+     * @return true if the two positions are equal
      */
     @Override
     public boolean equals(Object o) {
@@ -153,11 +165,12 @@ public class Position implements Cloneable {
 
     /**
      * calculates distance between two position
-     * @param other
-     * @return
+     *
+     * @param other position you want to measure the distance to
+     * @return the distance between two positions
      */
-    public double distance(Position other){
-       return Math.sqrt(Math.pow((x - other.x),2)+Math.pow((y - other.y),2));
+    public double distance(Position other) {
+        return Math.sqrt(Math.pow((x - other.x), 2) + Math.pow((y - other.y), 2));
     }
 }
 

@@ -10,14 +10,14 @@ import java.util.Random;
 /**
  * Player ship class
  */
-public class Ship extends AIControlled implements MovingGameObject{
+public class Ship extends AIControlled implements MovingGameObject {
     Random random;
     ListIterator<Position> patternIterator;
     MovementPatterns movementPatterns;
     ArrayList<Position> pattern;
-    private Position targetcoordinates;
-
-
+    private Position targetCoordinates;
+    //  int number = gameView.playSound("ship.wav", true);
+    int hash;
 
 
     /**
@@ -29,29 +29,28 @@ public class Ship extends AIControlled implements MovingGameObject{
         hitBox.width = 90;
         hitBox.height = 75;
         movementPatterns = new MovementPatterns();
-        this.pattern = movementPatterns.getRandomPattern();
+        this.pattern = movementPatterns.getPattern("zigzag");
         this.patternIterator = pattern.listIterator();
-        this.targetcoordinates = new Position(2, 2);
+        this.targetCoordinates = new Position(2, 2);
         this.health = 200;
         this.speedInPixel = 2;
-        this.position = new Position(random.nextInt(GameView.WIDTH - 0) + 0, random.nextInt(GameView.HEIGHT - 0) + 0);
+        this.position = new Position(random.nextInt(GameView.WIDTH), random.nextInt(GameView.HEIGHT-100));
         this.amountOfAmmo = 100;
         this.width = (int) (24 * size);
         this.height = (int) (9 * size);
-        this.size = 3;
+        this.size = 2.5;
         this.rotation = -45;
         flyFromLeftToRight = true;
+        this.hash = hashCode();
     }
 
-    @Override
-    /**@
-     * draws the Alien on the canvas
+    /**
+     * @ draws the Alien on the canvas
      */
+    @Override
     public void addToCanvas() {
         gameView.addImageToCanvas("CombatShip.png", position.x, position.y, size, rotation);
-        //gameView.addRectangleToCanvas(hitBox.x,hitBox.y,hitBox.width, hitBox.height,2,false, Color.red);
     }
-
 
 
     /**
@@ -59,6 +58,10 @@ public class Ship extends AIControlled implements MovingGameObject{
      */
     @Override
     public void updateStatus() {
+        if (gameView.timerExpired("plasmatimer" + hash, "plasmatimer" + hash)) {
+            gamePlayManager.shootPlasmaBall(position);
+            gameView.setTimer("plasmatimer" + hash, "plasmatimer" + hash, 1000);
+        }
 
     }
 
@@ -67,49 +70,38 @@ public class Ship extends AIControlled implements MovingGameObject{
      */
     @Override
     public void updatePosition() {
-        {
-            double distance = position.distance(targetcoordinates);
-            if (distance <= speedInPixel) {
 
-                if (patternIterator.hasNext()) {
-                    Position pos = patternIterator.next();
-                    targetcoordinates = pos;
-                    System.out.print(pos);
-                } else {
+        double distance = position.distance(targetCoordinates);
+        if (distance <= speedInPixel) {
 
-
-                        pattern = movementPatterns.getRandomPattern();
-                        patternIterator = pattern.listIterator();
-
-                }
+            if (patternIterator.hasNext()) {
+                Position pos = patternIterator.next();
+                targetCoordinates = pos;
+                System.out.print(pos);
             } else {
-                position.right((targetcoordinates.x - position.x) / distance * speedInPixel);
-                position.down((targetcoordinates.y - position.y) / distance * speedInPixel);
+
+
+                pattern = movementPatterns.getPattern("zigzag");
+                patternIterator = pattern.listIterator();
+
             }
-
-
+        } else {
+            position.right((targetCoordinates.x - position.x) / distance * speedInPixel);
+            position.down((targetCoordinates.y - position.y) / distance * speedInPixel);
         }
 
 
     }
-    @Override
+
     /**
      * Moves the object slightly to the right.
+     *
      * @param speedInPixel sets the amount of acceleration, the object gets
      */
+    @Override
     public void updatePosition(double speedInPixel) {
 
-        if (flyFromLeftToRight) {
-            this.position.x += 1 * speedInPixel;
-            if (position.x == GameView.WIDTH - 100) {
-                flyFromLeftToRight = false;
-            }
-        } else {
-            this.position.x -= 1 * speedInPixel;
-            if (position.x == 0) {
-                flyFromLeftToRight = true;
-            }
-        }
+
     }
 
 
@@ -120,12 +112,6 @@ public class Ship extends AIControlled implements MovingGameObject{
 
     }
 
-    /**
-     * lands an alien spaceship on the ground
-     */
-    public void land() {
-
-    }
 
     /**
      * setter method of object
@@ -137,10 +123,6 @@ public class Ship extends AIControlled implements MovingGameObject{
         this.position = position;
     }
 
-
-    private double calculateSpeed() {
-        return (speedInPixel * 2);
-    }
 
     private int calculateRemainingHealth(int damage) {
         return (health - damage);

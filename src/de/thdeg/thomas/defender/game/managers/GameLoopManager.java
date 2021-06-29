@@ -19,7 +19,7 @@ public class GameLoopManager {
         this.gameView = new GameView();
         this.gameView.setWindowTitle("Defender");
         this.gameView.setStatusText("Nick Thomas - Java Programmierung SS 2021");
-        this.gameView.setWindowIcon("Target.png");
+        this.gameView.setWindowIcon("Player.png");
         this.gameObjectManager = new GameObjectManager(gameView);
         this.inputManager = new InputManager(gameView, gameObjectManager.getPlayer());
         this.gamePlayManager = new GamePlayManager(gameView, gameObjectManager);

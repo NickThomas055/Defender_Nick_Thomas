@@ -1,11 +1,9 @@
 package de.thdeg.thomas.defender.game.managers;
 
+import de.thdeg.thomas.defender.game.Position;
 import de.thdeg.thomas.defender.gameview.GameView;
 import de.thdeg.thomas.defender.graphics.entities.*;
-import de.thdeg.thomas.defender.graphics.level.Clouds;
-import de.thdeg.thomas.defender.graphics.level.Ground;
-import de.thdeg.thomas.defender.graphics.level.HUD;
-import de.thdeg.thomas.defender.graphics.level.Hills;
+import de.thdeg.thomas.defender.graphics.level.*;
 
 import java.util.LinkedList;
 
@@ -14,8 +12,6 @@ import java.util.LinkedList;
  */
 public class GameObjectManager {
 
-    private GameView gameView;
-    private String house;
     /**
      * private final Alien alien;
      * private final Hills hills;
@@ -28,8 +24,8 @@ public class GameObjectManager {
     private final Ground ground;
     private final RandomBall ball;
     private final HUD hud;
-    private final FollowerBall followerBall;
-    private static final boolean NODIAGONAL = true;
+    private final Map map;
+    private final Overlay overlay;
     LinkedList<GameObject> gameObjects;
     LinkedList<Alien> aliens;
     LinkedList<Laser> lasers;
@@ -37,6 +33,8 @@ public class GameObjectManager {
     LinkedList<Ship> ships;
     LinkedList<Shot> shots;
     LinkedList<Vehicles> vehicles;
+    LinkedList<PlasmaBall> plasmaBalls;
+    LinkedList<Farmer> farmers;
 
 
     /**
@@ -45,13 +43,12 @@ public class GameObjectManager {
      * @param gameView is responsible for visuals
      */
     public GameObjectManager(GameView gameView) {
-        this.gameView = gameView;
+        this.map = new Map(gameView, this);
         this.hills = new Hills(gameView);
         this.clouds = new Clouds(gameView);
         this.ground = new Ground(gameView);
         this.chopper = new Chopper(gameView);
         this.ball = new RandomBall(gameView);
-        this.followerBall = new FollowerBall(gameView, ball);
         this.gameObjects = new LinkedList<>();
         this.aliens = new LinkedList<>();
         this.lasers = new LinkedList<>();
@@ -60,6 +57,10 @@ public class GameObjectManager {
         this.shots = new LinkedList<>();
         this.ships = new LinkedList<>();
         this.hud = new HUD(gameView);
+        this.plasmaBalls = new LinkedList<>();
+        this.farmers = new LinkedList<>();
+        this.overlay = new Overlay(gameView);
+
 
     }
 
@@ -69,17 +70,20 @@ public class GameObjectManager {
     public void updateGameObjects() {
         gameObjects.clear();
 
+
         gameObjects.add(clouds);
         gameObjects.add(hills);
         gameObjects.add(ground);
+        gameObjects.add(map);
         gameObjects.add(hud);
-        gameObjects.addAll(aliens);
         gameObjects.add(chopper);
         gameObjects.addAll(shots);
+        gameObjects.addAll(farmers);
+        gameObjects.addAll(aliens);
         gameObjects.addAll(ships);
         gameObjects.add(ball);
-        gameObjects.add(followerBall);
-
+        gameObjects.addAll(plasmaBalls);
+        gameObjects.add(overlay);
 
 
         for (var gameObject : gameObjects) {
@@ -95,13 +99,14 @@ public class GameObjectManager {
     /**
      * moves the Background when the chopper is far right or left enough
      *
-     * @param adaptX
-     * @param adaptY
+     * @param adaptX adapts x-position
+     * @param adaptY adapts y-position
      */
     public void moveWorld(double adaptX, double adaptY) {
+
         for (var gameObject : gameObjects) {
             if (gameObject.getClass() == chopper.getClass()) {
-                continue;
+
             } else {
                 gameObject.adaptPosition(adaptX, adaptY);
             }
@@ -110,13 +115,53 @@ public class GameObjectManager {
     }
 
     /**
+     * @return position of background clouds
+     */
+    public Position getCloudPosition() {
+        return clouds.getPosition();
+    }
+
+    /**
+     * @return list of all farmer entities
+     */
+    public LinkedList<Farmer> getFarmers() {
+        return farmers;
+    }
+
+    /**
      * returns playable object
      *
      * @return the player character
      */
-    Chopper getPlayer() {
+    public Chopper getPlayer() {
         return (chopper);
     }
+
+    /**
+     *
+     * @return Overlay
+     *
+     */
+    public Overlay getOverlay() {
+        return overlay;
+    }
+
+    /**
+     * updates HuD elements
+     *
+     * @param score sets new player score
+     */
+    public void updateHUD(int score) {
+        hud.updateGameLevel(score);
+    }
+
+    /**
+     * @return list of all PlasmaBalls
+     */
+    public LinkedList<PlasmaBall> getPlasmaBalls() {
+        return plasmaBalls;
+    }
+
 
     /**
      * returns list of all GameObjects
@@ -132,7 +177,7 @@ public class GameObjectManager {
      *
      * @return list of all ships
      */
-    public LinkedList getShips() {
+    public LinkedList<Ship> getShips() {
         return ships;
     }
 
@@ -141,7 +186,7 @@ public class GameObjectManager {
      *
      * @return list of all shots
      */
-    public LinkedList getShots() {
+    public LinkedList<Shot> getShots() {
         return shots;
     }
 
@@ -150,7 +195,7 @@ public class GameObjectManager {
      *
      * @return list of all powerups
      */
-    public LinkedList getPowerUp() {
+    public LinkedList<PowerUp> getPowerUp() {
         return powerups;
     }
 
@@ -159,7 +204,7 @@ public class GameObjectManager {
      *
      * @return list of all lasers
      */
-    public LinkedList getLaser() {
+    public LinkedList<Laser> getLaser() {
         return lasers;
     }
 
@@ -168,7 +213,7 @@ public class GameObjectManager {
      *
      * @return list of all alien objects
      */
-    public LinkedList getAliens() {
+    public LinkedList<Alien> getAliens() {
         return aliens;
     }
 }

@@ -5,7 +5,7 @@ import de.thdeg.thomas.defender.gameview.GameView;
 import de.thdeg.thomas.defender.graphics.entities.MovingGameObject;
 
 /**
- * class for displaying the ground of the level
+ * class for displaying the ground of the Level
  */
 public class Ground extends Background implements MovingGameObject {
 
@@ -25,13 +25,14 @@ public class Ground extends Background implements MovingGameObject {
         this.height = 200;
 
     }
-    @Override
+
     /**
      * draws hills on the background
      */
+    @Override
     public void addToCanvas() {
 
-        gameView.addImageToCanvas("ground.png",position.x,position.y+150,5,0);
+        gameView.addImageToCanvas("ground.png", position.x, position.y + 150, 5, 0);
     }
 
     /**
@@ -51,11 +52,12 @@ public class Ground extends Background implements MovingGameObject {
         this.position.x += 1;
     }
 
-    @Override
-    /** Moves the object slightly to the right.
+    /**
+     * Moves the object slightly to the right.
      *
      * @param speedInPixel sets the amount of acceleration, the object gets
      */
+    @Override
     public void updatePosition(double speedInPixel) {
         this.position.x += 1 * speedInPixel;
 
@@ -64,7 +66,7 @@ public class Ground extends Background implements MovingGameObject {
 
     @Override
     public void adaptPosition(double adaptX, double adaptY) {
-        position.x += adaptX*1.5;
+        position.x += adaptX * 1.5;
 
     }
 }

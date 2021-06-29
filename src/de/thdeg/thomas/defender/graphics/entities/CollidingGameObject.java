@@ -1,19 +1,26 @@
 package de.thdeg.thomas.defender.graphics.entities;
 
 import de.thdeg.thomas.defender.gameview.GameView;
+
 import java.util.ArrayList;
-/** An object that can actively collide with other objects, e.g. a shot. */
+
+/**
+ * An object that can actively collide with other objects, e.g. a shot.
+ */
 public abstract class CollidingGameObject extends CollidableGameObject {
     protected final ArrayList<CollidableGameObject> objectsToCollideWith;
-    protected CollidingGameObject(GameView gameView,ArrayList<CollidableGameObject> objectsToCollideWith) {
+
+    protected CollidingGameObject(GameView gameView, ArrayList<CollidableGameObject> objectsToCollideWith) {
         super(gameView);
         this.objectsToCollideWith = objectsToCollideWith;
     }
+
     @Override
     public void update() {
         super.update();
         checkCollisions();
     }
+
     /**
      * Used to check possible collisions that are actively caused by this game object.
      * Both parties are notified about the collision.
@@ -26,6 +33,7 @@ public abstract class CollidingGameObject extends CollidableGameObject {
             }
         }
     }
+
     /**
      * Determines if this game object is collided with the other game object.
      *

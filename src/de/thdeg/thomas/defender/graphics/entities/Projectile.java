@@ -7,14 +7,15 @@ import java.util.ArrayList;
 /**
  * parent class for any kind of projectile(rocket, shell , debris)
  */
-abstract public class Projectile extends CollidingGameObject{
-    Projectile(GameView gameView,ArrayList<CollidableGameObject> collidableGameObject){
-        super(gameView,collidableGameObject);
+abstract public class Projectile extends CollidingGameObject {
+    Projectile(GameView gameView, ArrayList<CollidableGameObject> collidableGameObject) {
+        super(gameView, collidableGameObject);
     }
+
     @Override
-    public void updateHitBoxPosition(){
-        this.hitBox.x = (int)this.position.x;
-        this.hitBox.y = (int)this.position.y+10;
+    public void updateHitBoxPosition() {
+        this.hitBox.x = (int) this.position.x;
+        this.hitBox.y = (int) this.position.y + 10;
 
     }
 

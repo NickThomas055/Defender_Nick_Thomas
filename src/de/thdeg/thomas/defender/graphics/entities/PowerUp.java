@@ -9,7 +9,7 @@ import java.util.Random;
 /**
  * parent class for different kinds of PowerUp's
  */
-public class PowerUp extends CollidableGameObject implements MovingGameObject,Cloneable{
+public class PowerUp extends CollidableGameObject implements MovingGameObject, Cloneable {
     Random random;
     effects effect;
     private final String objectID;
@@ -21,7 +21,7 @@ public class PowerUp extends CollidableGameObject implements MovingGameObject,Cl
         hitBox.height = 40;
         this.speedInPixel = 0;
         this.effect = effects.values()[new Random().nextInt(effects.values().length)];
-        this.position = new Position(random.nextInt(GameView.WIDTH - 0) + 0, random.nextInt(GameView.HEIGHT - 0) + 0);
+        this.position = new Position(random.nextInt(GameView.WIDTH), random.nextInt(GameView.HEIGHT));
         this.width = (int) (24 * size);
         this.height = (int) (9 * size);
         this.size = 2;
@@ -29,8 +29,17 @@ public class PowerUp extends CollidableGameObject implements MovingGameObject,Cl
         this.objectID = "PowerUp" + (int) position.x + (int) position.y;
 
     }
-    private enum effects{
-        HEALTH,AMMO,LASER,BOMB
+
+    private enum effects {
+        HEALTH, AMMO, LASER, BOMB
+    }
+
+    private void playSound() {
+
+    }
+
+    private void generateRandomEffect() {
+
     }
 
     /**
@@ -51,8 +60,6 @@ public class PowerUp extends CollidableGameObject implements MovingGameObject,Cl
 
     /**
      * updates Position of Object with speed parameter
-     *
-     * @param SpeedInPixel
      */
     @Override
     public void updatePosition(double SpeedInPixel) {
@@ -66,27 +73,30 @@ public class PowerUp extends CollidableGameObject implements MovingGameObject,Cl
     public void addToCanvas() {
 
     }
+
     @Override
     public void reactToCollision(CollidableGameObject otherObject) {
 
 
     }
+
     @Override
-    public void updateHitBoxPosition(){
-        this.hitBox.x = (int)this.position.x;
-        this.hitBox.y = (int)this.position.y+10;
+    public void updateHitBoxPosition() {
+        this.hitBox.x = (int) this.position.x;
+        this.hitBox.y = (int) this.position.y + 10;
 
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this==o) {
+        if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         PowerUp other = (PowerUp) o;
-        return this.effect == other.effect && this.speedInPixel == other.speedInPixel && this.position.equals(other) && this.size == other.size;
+        return this.effect == other.effect && this.speedInPixel == other.speedInPixel && this.position.equals(other.position) && this.size == other.size;
     }
 
     /**
@@ -96,7 +106,7 @@ public class PowerUp extends CollidableGameObject implements MovingGameObject,Cl
      */
     @Override
     public int hashCode() {
-        return Objects.hash(position.x, position.y, effect, speedInPixel,size);
+        return Objects.hash(position.x, position.y, effect, speedInPixel, size);
 
     }
 
@@ -107,9 +117,9 @@ public class PowerUp extends CollidableGameObject implements MovingGameObject,Cl
      */
     @Override
     public PowerUp clone() {
-        PowerUp other = null;
-            other = (PowerUp) super.clone();
-            other.position = this.position.clone();
+        PowerUp other;
+        other = (PowerUp) super.clone();
+        other.position = this.position.clone();
 
 
         return other;

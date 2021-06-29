@@ -10,21 +10,31 @@ import java.util.Random;
 /**
  * creates Alien objects for the player to fight
  */
-public class Alien extends AIControlled implements MovingGameObject{
+public class Alien extends AIControlled implements MovingGameObject {
+    Farmer followMe;
     Random random;
     private final String objectID;
+    private Position targetCoordinates;
+    private State state;
+
+
+    private enum State {
+        ESCAPE, GRAB,
+    }
 
     /**
      * creates Alien with basic parameters
      */
-    public Alien(GameView gameView) {
+    public Alien(GameView gameView, Farmer followMe) {
         super(gameView);
         random = new Random();
+        this.followMe = followMe;
+        this.state = State.GRAB;
         hitBox.width = 60;
         hitBox.height = 40;
         this.health = 200;
-        this.speedInPixel = 1;
-        this.position = new Position(random.nextInt(GameView.WIDTH - 0) + 0, random.nextInt(GameView.HEIGHT - 0) + 0);
+        this.speedInPixel = 0.5;
+        this.position = new Position(random.nextInt(1600) + 1, random.nextInt((GameView.HEIGHT - 500)) + 1);
         this.objectID = "Alien" + (int) position.x + (int) position.y;
         this.amountOfAmmo = 100;
         this.width = (int) (24 * size);
@@ -32,26 +42,31 @@ public class Alien extends AIControlled implements MovingGameObject{
         this.size = 2;
         this.rotation = 0;
         flyFromLeftToRight = true;
+
+        int number = gameView.playSound("alienwav.wav", false);
     }
 
-    @Override
     /**
      * draws the Alien on the canvas
      */
+    @Override
     public void addToCanvas() {
 
         gameView.addImageToCanvas("Alien.png", position.x, position.y, size, rotation);
-      //  gameView.addRectangleToCanvas(hitBox.x, hitBox.y, hitBox.width, hitBox.height, 2, false, Color.red);
+        //  gameView.addRectangleToCanvas(hitBox.x, hitBox.y, hitBox.width, hitBox.height, 2, false, Color.red);
+        if (state == State.ESCAPE) {
+            gameView.addImageToCanvas("Beam.png", position.x, position.y+60, size, rotation);
+
+        }
     }
 
 
-
-    @Override
     /**
      * Moves the object slightly to the right.
      *
      * @param speedInPixel sets the amount of acceleration, the object gets
      */
+    @Override
     public void updatePosition(double speedInPixel) {
 
         if (flyFromLeftToRight) {
@@ -73,16 +88,23 @@ public class Alien extends AIControlled implements MovingGameObject{
     @Override
     public void updatePosition() {
 
-        if (flyFromLeftToRight) {
-            this.position.x += 1;
-            if (position.x == GameView.WIDTH - 50) {
-                flyFromLeftToRight = false;
+
+        if (state == State.ESCAPE) {
+            targetCoordinates = new Position(position.x, 0);
+            double distance = position.distance(targetCoordinates);
+            if (distance >= speedInPixel) {
+                position.right((targetCoordinates.x - position.x) / distance * speedInPixel);
+                position.down((targetCoordinates.y - position.y) / distance * speedInPixel);
             }
-        } else {
-            this.position.x -= 1;
-            if (position.x == 0) {
-                flyFromLeftToRight = true;
+        } else if (state == State.GRAB) {
+
+            targetCoordinates = followMe.getPosition().clone();
+            double distance = position.distance(targetCoordinates);
+            if (distance >= speedInPixel) {
+                position.right((targetCoordinates.x - position.x) / distance * speedInPixel);
+                position.down((targetCoordinates.y - position.y) / distance * speedInPixel);
             }
+
         }
     }
 
@@ -94,18 +116,27 @@ public class Alien extends AIControlled implements MovingGameObject{
 
     }
 
-    /**
-     * lands an alien spaceship on the ground
-     */
-    public void land() {
+    @Override
+    public void reactToCollision(CollidableGameObject collidableGameObject) {
+        if (collidableGameObject.getClass() == Shot.class) {
+            followMe.makeFarmerFall();
+        }
+        state = State.ESCAPE;
+
 
     }
+
 
     /**
      * updates status of Object
      */
     @Override
     public void updateStatus() {
+        if (position.y <= 1) {
+            gamePlayManager.destroyAliens(this);
+            gamePlayManager.gameOver = true;
+        }
+
 
     }
 
@@ -121,12 +152,20 @@ public class Alien extends AIControlled implements MovingGameObject{
     }
 
 
-    private double calculateSpeed() {
-        return (speedInPixel * 2);
-    }
-
     private int calculateRemainingHealth(int damage) {
         return (health - damage);
+
+    }
+
+    /**
+     * adapts position relative to player
+     *
+     * @param adaptX
+     * @param adaptY
+     */
+    @Override
+    public void adaptPosition(double adaptX, double adaptY) {
+        position.x += adaptX * 1.5;
 
     }
 

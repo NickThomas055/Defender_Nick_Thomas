@@ -6,7 +6,7 @@ import de.thdeg.thomas.defender.gameview.GameView;
 /**
  * class for special laser weapon
  */
-public class Laser extends CollidableGameObject implements MovingGameObject{
+public class Laser extends CollidableGameObject implements MovingGameObject {
 
 
     /**
@@ -18,6 +18,7 @@ public class Laser extends CollidableGameObject implements MovingGameObject{
         super(gameView);
 
     }
+
     @Override
     public void reactToCollision(CollidableGameObject otherObject) {
 
@@ -27,11 +28,12 @@ public class Laser extends CollidableGameObject implements MovingGameObject{
      * responsible for aligning a hitbox with an object
      */
     @Override
-    public void updateHitBoxPosition(){
-        this.hitBox.x = (int)this.position.x;
-        this.hitBox.y = (int)this.position.y+10;
+    public void updateHitBoxPosition() {
+        this.hitBox.x = (int) this.position.x;
+        this.hitBox.y = (int) this.position.y + 10;
 
     }
+
     /**
      * updates status of Object
      */
@@ -50,8 +52,6 @@ public class Laser extends CollidableGameObject implements MovingGameObject{
 
     /**
      * updates Position of Object with speed parameter
-     *
-     * @param SpeedInPixel
      */
     @Override
     public void updatePosition(double SpeedInPixel) {

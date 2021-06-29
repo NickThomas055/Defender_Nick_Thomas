@@ -1,16 +1,19 @@
 package de.thdeg.thomas.defender.graphics.entities;
 
 import de.thdeg.thomas.defender.gameview.GameView;
+
 import java.awt.*;
 import java.util.Objects;
 
-/** Represents all game objects that are able to collide with something. */
-public abstract class CollidableGameObject extends GameObject implements Cloneable{
+/**
+ * Represents all game objects that are able to collide with something.
+ */
+public abstract class CollidableGameObject extends GameObject implements Cloneable {
     protected Rectangle hitBox;
 
     protected CollidableGameObject(GameView gameView) {
         super(gameView);
-        this.hitBox = new Rectangle((int)this.position.x, (int)this.position.y, 50, 50);
+        this.hitBox = new Rectangle((int) this.position.x, (int) this.position.y, 50, 50);
     }
 
     @Override
@@ -36,6 +39,7 @@ public abstract class CollidableGameObject extends GameObject implements Cloneab
         super.adaptPosition(adaptX, adaptY);
         updateHitBoxPosition();
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -45,7 +49,7 @@ public abstract class CollidableGameObject extends GameObject implements Cloneab
             return false;
         }
         CollidableGameObject other = (CollidableGameObject) o;
-        return  this.position.equals(other) && this.size == other.size;
+        return this.position.equals(other.position) && this.size == other.size;
     }
 
     /**
@@ -55,13 +59,14 @@ public abstract class CollidableGameObject extends GameObject implements Cloneab
      */
     @Override
     public int hashCode() {
-        return Objects.hash(position.x, position.y,size);
+        return Objects.hash(position.x, position.y, size);
 
     }
+
     @Override
     public CollidableGameObject clone() {
-        CollidableGameObject other = null;
-            other = (CollidableGameObject) super.clone();
+        CollidableGameObject other;
+        other = (CollidableGameObject) super.clone();
         return other;
     }
 
